@@ -88,3 +88,131 @@ bfs(graph, 1, visited)
 ```
 
 가장 먼저 들어온 노드를 popleft를 이용해 꺼내고, 꺼낸 노드와 인접한 노드를 큐에 넣는다. 그리고 그 다음으로 먼저 들어온 노드를 popleft로 꺼내서 이와 인접한 노드를 또 다시 큐에 넣는다. 이런식으로 큐가 빌 때까지 계속 반복한다. 얘는 재귀말고 while문을 사용한다.
+
+
+
+
+# 🎯 문제) 백준 1012 유기농 배추
+
+[1012번: 유기농 배추](https://www.acmicpc.net/problem/1012)
+
+**[BFS 풀이]**
+
+```python
+from collections import deque
+
+dx, dy = [-1, 1, 0, 0], [0, 0, -1, 1]
+
+def bfs(x, y, _cnt):
+    # 시작점
+    q = deque()
+    q.append((x, y))
+    dist[x][y] = _cnt
+
+    while q:
+        x, y = q.popleft()
+
+        for k in range(4):
+            nx, ny = x+dx[k], y+dy[k]
+
+            if 0<=nx<n and 0<=ny<m:
+                if a[nx][ny] == 1 and dist[nx][ny] == -1:
+                    q.append((nx, ny))
+                    dist[nx][ny] = _cnt
+
+t = int(input())
+for _ in range(t):
+    cnt = 0
+    n, m, c = map(int, input().split())
+    a = [[0] * m for _ in range(n)]
+    dist = [[-1]*m for _ in range(n)]
+
+    for _ in range(c):
+        i, j = map(int, input().split())
+        a[i][j] = 1
+
+    # bfs 탐색
+    for i in range(n):
+        for j in range(m):
+            if a[i][j] == 1 and dist[i][j] == -1:
+                cnt += 1
+                bfs(i, j, cnt)
+
+    print(cnt)
+```
+
+**[BFS 풀이 2]**
+
+```python
+# BFS 풀이 2 (이게 더 간결한듯..?)
+t = int(input())
+dx = [1, -1, 0, 0]
+dy = [0, 0, -1, 1]
+
+def bfs(x, y):
+    queue = [[x, y]]
+    while queue:
+        a, b = queue[0][0], queue[0][1]
+        del queue[0]  # 이게 pop 과정인 것 같은디
+
+        for i in range(4):
+            q = a + dx[i]
+            w = b + dy[i]
+            if 0 <= q < n and 0 <= w < m and s[q][w] == 1: # 만약에 좌표가 주어진 범위 안이고, 배추가 있는 곳이면
+                s[q][w] = 0 # 0으로 만들어주고
+                queue.append([q, w])  # 큐에 좌표 추가
+
+for i in range(t):
+    m, n, k = map(int, input().split())
+    s = [[0] * m for i in range(n)]
+    cnt = 0
+    for j in range(k): # 표 만들어줌
+        a, b = map(int, input().split())
+        s[b][a] = 1
+
+    for q in range(n): # 하나씩 탐색 시작
+        for w in range(m):
+            if s[q][w] == 1: # 만약 배추가 있다면 (1이라면) bfs로 더 탐색해줌
+                bfs(q, w)
+                s[q][w] = 0 # 더이상 1이 없어서 bfs를 빠져나왔다면 0으로 만들어주고 
+                cnt += 1 # cnt 횟수 1 증가
+    print(cnt)
+```
+
+**[DFS 풀이]**
+
+```python
+import sys 
+sys.setrecursionlimit(10000) 
+
+def dfs(x, y): 
+    dx = [1, -1, 0, 0] 
+    dy = [0, 0, 1, -1] # 상,하,좌,우 확인 
+    
+    for i in range(4): 
+        nx = x + dx[i] 
+        ny = y + dy[i] 
+        
+        if (0 <= nx < N) and (0 <= ny < M): 
+            if matrix[nx][ny] == 1: 
+                matrix[nx][ny] = -1 
+                dfs(nx, ny) 
+                
+T = int(input()) 
+for _ in range(T): 
+    M, N, K = map(int, input().split()) 
+    matrix = [[0]*M for _ in range(N)] 
+    cnt = 0 
+    
+    # 행렬 생성  
+    for _ in range(K): 
+        m, n = map(int, input().split()) 
+        matrix[n][m] = 1 
+        
+        for i in range(N): # 행 (바깥 리스트) 
+            for j in range(M): # 열 (내부 리스트) 
+                if matrix[i][j] > 0: 
+                    dfs(i, j) 
+                    cnt += 1 
+    print(cnt)
+```
